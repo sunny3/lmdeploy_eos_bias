@@ -300,7 +300,7 @@ class FusedLogitsProcessor(LogitsWarper):
         self.ignore_eos = ignore_eos
         self.tokenizer = tokenizer
         self.logit_bias = {
-            128001: 2
+            128001: 3
         }
 
     async def _wait_stream_once(self):
