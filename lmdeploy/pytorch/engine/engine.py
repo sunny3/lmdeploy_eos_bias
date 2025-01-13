@@ -558,7 +558,8 @@ class Engine:
                                     guided_input_ids: torch.Tensor,
                                     sampling_inputs: SamplingInputs,
                                     inputs: ModelInputs,
-                                    ignore_eos: torch.Tensor):
+                                    ignore_eos: torch.Tensor,
+                                    current_iter: int):
         """sampling logits."""
 
         def __get_last_logits():
@@ -572,7 +573,8 @@ class Engine:
 
         split_logits = __get_last_logits()
         logits_processor = FusedLogitsProcessor(sampling_inputs, ignore_eos,
-                                                self.tokenizer.model.model)
+                                                self.tokenizer.model.model,
+                                                current_iter)
         logits = await logits_processor(all_ids, guided_input_ids,
                                         split_logits)
         next_token_ids = logits_processor.sampling(logits)
@@ -795,7 +797,7 @@ class Engine:
             # sampling
             next_token_ids = await self.async_sampling_logits(
                 logits, all_ids, guided_input_ids, sampling_inputs, inputs,
-                num_ignore_eos > 0)
+                num_ignore_eos > 0, idx)
             num_ignore_eos = num_ignore_eos - 1
 
             # stopping criteria

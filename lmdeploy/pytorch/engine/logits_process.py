@@ -9,6 +9,7 @@ from transformers.generation.logits_process import LogitsWarper
 
 from lmdeploy.messages import LogitsProcessor
 from lmdeploy.tokenizer import Tokenizer
+import logging
 
 from ..messages import SchedulerSequence
 
@@ -295,10 +296,12 @@ class FusedLogitsProcessor(LogitsWarper):
                  sampling_inputs: SamplingInputs,
                  ignore_eos: torch.Tensor,
                  tokenizer: Optional[Tokenizer] = None,
-                 logit_bias: Optional[Dict[int, float]] = None):
+                 logit_bias: Optional[Dict[int, float]] = None,
+                 current_iter: int = 0):
         self.sampling_inputs: SamplingInputs = sampling_inputs
         self.ignore_eos = ignore_eos
         self.tokenizer = tokenizer
+        self.current_iter = current_iter
         self.logit_bias = {
             128001: 3
         }
@@ -327,6 +330,8 @@ class FusedLogitsProcessor(LogitsWarper):
             torch.FloatTensor: The processed prediction scores.
 
         """
+        
+
         sampling_inputs = self.sampling_inputs
 
         custom_logits_processors = self.sampling_inputs.logits_processors
@@ -366,7 +371,15 @@ class FusedLogitsProcessor(LogitsWarper):
         """sampling."""
         sampling_inputs = self.sampling_inputs
 
-        if self.logit_bias is not None:
+
+        # apply logit bias
+        #logging.info(f"input_prompt_length: {self.input_prompt_length}")
+        #logging.info(f"len(logits): {len(logits)}\n")
+
+        #if self.logit_bias is not None and self.input_prompt_length is not None and len(logits) - self.input_prompt_length > 10:
+        #    raise ValueError(f"input_prompt_length: {self.input_prompt_length}, len(logits): {len(logits)}")
+        if self.current_iter > 10:
+            #raise ValueError(f"current_iter: {self.current_iter}")
             for token_id, bias_value in self.logit_bias.items():
                 logits[:, token_id] += bias_value
 

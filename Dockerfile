@@ -5,13 +5,20 @@ RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
+# Install dependencies from requirements files
+COPY requirements/build.txt requirements/runtime_cuda.txt requirements/lite.txt requirements/serve.txt /tmp/requirements/
+RUN pip install -r /tmp/requirements/build.txt && \
+    pip install -r /tmp/requirements/runtime_cuda.txt && \
+    pip install -r /tmp/requirements/lite.txt && \
+    pip install -r /tmp/requirements/serve.txt && \
+    rm -rf /tmp/requirements
+
 # Copy LMDeploy source code
 COPY . /opt/lmdeploy
 WORKDIR /opt/lmdeploy
 
-# Install in development mode
+# Install LMDeploy package
 RUN pip install -e .
-
 
 # Run LMDeploy API server
 #CMD ["lmdeploy", "serve", "api_server", "/data/L3-TheSpice-8b-v0.8.3", \
