@@ -378,7 +378,7 @@ class FusedLogitsProcessor(LogitsWarper):
 
         #if self.logit_bias is not None and self.input_prompt_length is not None and len(logits) - self.input_prompt_length > 10:
         #    raise ValueError(f"input_prompt_length: {self.input_prompt_length}, len(logits): {len(logits)}")
-        if self.current_iter > 10:
+        if self.current_iter > 5:
             #raise ValueError(f"current_iter: {self.current_iter}")
             for token_id, bias_value in self.logit_bias.items():
                 logits[:, token_id] += bias_value
